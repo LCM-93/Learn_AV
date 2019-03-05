@@ -83,12 +83,12 @@ public class AudioDecode {
 
             while (!Thread.interrupted()) {
                 if (!bIsEos) {
-                    int inputBufIndex = mCodec.dequeueInputBuffer(kTimeOutUs);
+                    int inputBufIndex = mCodec.dequeueInputBuffer(kTimeOutUs); //获取可用的inputBuffer -1代表一直等待 0代表不等待 建议-1 避免丢帧，这里
                     if (inputBufIndex >= 0) {
-                        //读取一帧数据至buffer
-                        ByteBuffer buffer = inputBuffers[inputBufIndex];
-                        int sampleSize = mMediaExtractor.readSampleData(buffer, 0);
-                        if (sampleSize < 0) {
+
+                        ByteBuffer buffer = inputBuffers[inputBufIndex]; //获取inputBuffer
+                        int sampleSize = mMediaExtractor.readSampleData(buffer, 0); //MediaExtractor读取数据到inputBuffer中
+                        if (sampleSize < 0) { //小于0 代表所有数据已经读取完毕
                             mCodec.queueInputBuffer(inputBufIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                             bIsEos = true;
                         } else {
@@ -99,6 +99,7 @@ public class AudioDecode {
                     }
                 }
 
+                //获取解码得到的byte[]数据  timeoutUs为等待时间 -1代表一直等待 0代表不等待 此处单位为微秒  此处建议不要填-1 有些时候并没有数据输出  那么他就会一直卡这  等待
                 int outIndex = mCodec.dequeueOutputBuffer(mDecodeBufferInfo, 0);
                 switch (outIndex) {
                     case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
@@ -115,16 +116,16 @@ public class AudioDecode {
                         break;
 
                     default:
-                        ByteBuffer outputBuffer = outputBuffers[outIndex];
+                        ByteBuffer outputBuffer = outputBuffers[outIndex]; //拿到用于存放PCM数据的Buffer
 
 
-                        byte[] data = new byte[mDecodeBufferInfo.size];
-                        outputBuffer.get(data);
-                        outputBuffer.clear();
+                        byte[] data = new byte[mDecodeBufferInfo.size]; // BufferInfo内定义了此数据块的大小
+                        outputBuffer.get(data); //将Buffer内的数据取出到字节数组中
+                        outputBuffer.clear(); //取出数据后 清空这些buffer
                         fosStream.write(data);
 
                         Log.d(TAG, "write data :" + data.length);
-                        mCodec.releaseOutputBuffer(outIndex, false);
+                        mCodec.releaseOutputBuffer(outIndex, false); //此操作一定要做 不然MediaCodec用完所有的Buffer后  将不能向外输出数据
                         break;
                 }
 
