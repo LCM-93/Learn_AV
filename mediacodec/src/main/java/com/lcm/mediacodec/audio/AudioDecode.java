@@ -57,6 +57,8 @@ public class AudioDecode {
             Log.i(TAG, "通道数: " + channelCount);
             long duration = mMediaFormat.getLong(MediaFormat.KEY_DURATION);//时长
             Log.i(TAG, "时长: " + duration);
+            int bitRate = mMediaFormat.getInteger(MediaFormat.KEY_BIT_RATE);//比特数
+            Log.i(TAG,"比特数: "+bitRate);
 
         } catch (IOException e) {
             e.printStackTrace();
