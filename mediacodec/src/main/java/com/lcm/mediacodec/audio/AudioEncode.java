@@ -41,7 +41,7 @@ public class AudioEncode {
     private FileOutputStream fos;
 
 
-    public void encode(String sourcePath, String outPath, String mimeType) {
+    public void encodeFile(String sourcePath, String outPath, String mimeType) {
         this.mSourcePath = sourcePath;
         this.mOutPath = outPath;
         if (!initMediaFormat(mimeType) || mEncoder == null) {
@@ -92,6 +92,32 @@ public class AudioEncode {
     }
 
 
+   public void initEncodeData(String  outPath){
+       this.mOutPath = outPath;
+       if (!initMediaFormat(MediaFormat.MIMETYPE_AUDIO_AAC) || mEncoder == null) {
+           Log.e(TAG, "create mediaEncode failed");
+           return;
+       }
+
+       mEncoder.start();
+       mEncodeInputBuffers = mEncoder.getInputBuffers(); // 获取输入的缓冲区
+       mEncodeOutputBuffers = mEncoder.getOutputBuffers(); //获取输出的缓冲区
+       mEncodeBufferInfo = new MediaCodec.BufferInfo(); //用于描述编码得到的byte信息
+   }
+
+   public void encodeData(byte[] data){
+        encodePCM(data);
+   }
+
+
+   public void release(){
+        if(mEncoder != null){
+            mEncoder.stop();
+            mEncoder.release();
+            mEncoder = null;
+        }
+   }
+
     /**
      * 编码字节
      *
@@ -134,8 +160,9 @@ public class AudioEncode {
             mEncoder.releaseOutputBuffer(outputIndex, false);
             outputIndex = mEncoder.dequeueOutputBuffer(mEncodeBufferInfo, 10000);
         }
-
     }
+
+
 
 
     /**

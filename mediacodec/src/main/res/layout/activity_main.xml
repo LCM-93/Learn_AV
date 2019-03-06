@@ -22,4 +22,16 @@
         android:text="编码"
         android:onClick="encode"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="开始录音"
+        android:onClick="startRecord"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="暂停录音"
+        android:onClick="stopRecord"/>
+
 </LinearLayout>

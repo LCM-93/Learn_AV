@@ -9,11 +9,15 @@ import android.view.View;
 
 import com.lcm.mediacodec.audio.AudioDecode;
 import com.lcm.mediacodec.audio.AudioEncode;
+import com.lcm.mediacodec.audio.RecordCaptor;
 
 
 public class MainActivity extends AppCompatActivity {
     private AudioDecode audioDecode;
     private AudioEncode audioEncode;
+
+    private RecordCaptor recordCaptor;
+    private AudioEncode recordEncode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +46,37 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 long start = System.currentTimeMillis();
                 audioEncode = new AudioEncode();
-                audioEncode.encode(Environment.getExternalStorageDirectory() + "/recorders/test.pcm", Environment.getExternalStorageDirectory() + "/recorders/test.aac", MediaFormat.MIMETYPE_AUDIO_AAC);
+                audioEncode.encodeFile(Environment.getExternalStorageDirectory() + "/recorders/test.pcm", Environment.getExternalStorageDirectory() + "/recorders/test.aac", MediaFormat.MIMETYPE_AUDIO_AAC);
                 long end = System.currentTimeMillis();
                 Log.e("MainActivity", "用时：" + (end - start) + "毫秒");
             }
         }).start();
     }
+
+
+    public void startRecord(View view) {
+        if (recordCaptor == null) {
+            recordCaptor = new RecordCaptor();
+        }
+        if (recordEncode == null) {
+            recordEncode = new AudioEncode();
+            recordEncode.initEncodeData(Environment.getExternalStorageDirectory() + "/recorders/record.aac");
+        }
+        recordCaptor.setRecordListener(new RecordCaptor.RecordListener() {
+            @Override
+            public void flushData(byte[] data) {
+                //将录音数据编码保存到文件中
+                if (recordEncode != null) recordEncode.encodeData(data);
+            }
+        });
+        recordCaptor.startRecord();
+    }
+
+
+    public void stopRecord(View view) {
+        if (recordCaptor != null) recordCaptor.stopRecord();
+        if(recordEncode != null) recordEncode.release();
+    }
+
+
 }
