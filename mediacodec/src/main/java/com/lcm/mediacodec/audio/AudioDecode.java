@@ -1,5 +1,8 @@
 package com.lcm.mediacodec.audio;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
@@ -24,11 +27,31 @@ public class AudioDecode {
     private MediaCodec.BufferInfo mDecodeBufferInfo;
     private MediaExtractor mMediaExtractor;
 
+    private AudioTrack mAudioTrack;
+
     public AudioDecode(String sourcePath) {
         this.mSourcePath = sourcePath;
         initMediaDecode();
+        initAudioTrack();
     }
 
+
+    /**
+     * 初始化AudioTrack
+     */
+    private void initAudioTrack(){
+        //计算需要最小缓冲区大小
+        int bufSize = AudioTrack.getMinBufferSize(44100,AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT);
+        //创建AudioTrack
+        //AudioFormat.CHANNEL_OUT_STEREO 双声道  AudioFormat.CHANNEL_OUT_MONO 单声道
+        //AudioFormat.ENCODING_PCM_16BIT  AudioFormat.ENCODING_PCM_8BIT  采样精度
+        //AudioTrack.MODE_STREAM 通过write()方法将数据一次次写入到AudioTrack中进行播放    AudioTrack.MODE_STATIC 把音频放入一个固定的buffer 一次性传给AudioTrack
+        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,44100,AudioFormat.CHANNEL_OUT_STEREO,AudioFormat.ENCODING_PCM_16BIT,bufSize,AudioTrack.MODE_STREAM);
+    }
+
+    /**
+     * 初始化MediaDecode
+     */
     private void initMediaDecode() {
         try {
             //获取音视频文件中的关键信息
@@ -65,17 +88,22 @@ public class AudioDecode {
         }
     }
 
+    /**
+     * 开始解码
+     * @param outPath
+     */
     public void decodeAudio(String outPath) {
         try {
             mCodec = MediaCodec.createDecoderByType(mMediaFormat.getString(MediaFormat.KEY_MIME)); //根据type创建MediaCodec
             mCodec.configure(mMediaFormat, null, null, 0); //配置 MediaCodec
             mCodec.start(); //开始解码
 
+            mAudioTrack.play();
+
             FileOutputStream fosStream = new FileOutputStream(outPath);
 
             ByteBuffer[] inputBuffers = mCodec.getInputBuffers(); //获取输入的缓存区
             ByteBuffer[] outputBuffers = mCodec.getOutputBuffers(); //获取输出的缓冲区
-            Log.w(TAG, "buffers: " + inputBuffers.length);
 
             //用于描述解码得到的byte信息
             mDecodeBufferInfo = new MediaCodec.BufferInfo();
@@ -124,7 +152,11 @@ public class AudioDecode {
                         byte[] data = new byte[mDecodeBufferInfo.size]; // BufferInfo内定义了此数据块的大小
                         outputBuffer.get(data); //将Buffer内的数据取出到字节数组中
                         outputBuffer.clear(); //取出数据后 清空这些buffer
+
+                        //像文件中写入数据
                         fosStream.write(data);
+                        //使用AudioTrack播放音频
+                        mAudioTrack.write(data,0,data.length);
 
                         Log.d(TAG, "write data :" + data.length);
                         mCodec.releaseOutputBuffer(outIndex, false); //此操作一定要做 不然MediaCodec用完所有的Buffer后  将不能向外输出数据
@@ -147,6 +179,10 @@ public class AudioDecode {
            }
            if(mDecodeBufferInfo != null){
                mDecodeBufferInfo = null;
+           }
+           if(mAudioTrack != null){
+               mAudioTrack.stop();
+               mAudioTrack.release();
            }
         }
     }
