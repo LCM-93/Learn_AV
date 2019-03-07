@@ -129,3 +129,11 @@ sudo chmod +x build_android.sh
 ./build_android.sh
 ```
 
+
+
+
+
+## 引入FFmpeg
+
+[Android Studio通过cmake创建FFmpeg项目](https://blog.csdn.net/eydwyz/article/details/78757262)
+

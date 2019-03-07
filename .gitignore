@@ -39,7 +39,6 @@ Thumbs.db
 #NDK
 obj/
 
-*.sh
 
 *.json
 
