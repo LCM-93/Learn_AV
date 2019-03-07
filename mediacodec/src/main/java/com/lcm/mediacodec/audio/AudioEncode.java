@@ -38,9 +38,16 @@ public class AudioEncode {
     private int channelCount = 2; //声道数
     private int bitRate = 128000; //比特率
     private int inputBufferSize = 100 * 1024; //inputBuffer的大小
+    private int aacProfile = MediaCodecInfo.CodecProfileLevel.AACObjectLC;
     private FileOutputStream fos;
 
 
+    /**
+     * 转码pcm文件
+     * @param sourcePath
+     * @param outPath
+     * @param mimeType
+     */
     public void encodeFile(String sourcePath, String outPath, String mimeType) {
         this.mSourcePath = sourcePath;
         this.mOutPath = outPath;
@@ -77,7 +84,7 @@ public class AudioEncode {
             mMediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate); //设置比特率
             if (mimeType.equals(MediaFormat.MIMETYPE_AUDIO_AAC)) { //仅编码AAC文件需要配置
                 //描述要使用的AAC配置文件的键
-                mMediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+                mMediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, aacProfile);
             }
             mMediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, inputBufferSize); //输入缓存区的最大大小
             mEncoder = MediaCodec.createEncoderByType(mimeType); //根据格式类型创建MediaCodec
@@ -104,6 +111,7 @@ public class AudioEncode {
        mEncodeOutputBuffers = mEncoder.getOutputBuffers(); //获取输出的缓冲区
        mEncodeBufferInfo = new MediaCodec.BufferInfo(); //用于描述编码得到的byte信息
    }
+
 
    public void encodeData(byte[] data){
         encodePCM(data);
@@ -173,9 +181,9 @@ public class AudioEncode {
      * 编码AAC音频需要在每一块的头部添加ADTS，包含了AAC文件的采样率、通道数、帧数据长度等信息
      **/
     private void addADTStoPacket(byte[] packet, int packetLen) {
-        int profile = 2; // AAC LC
+        int profile = aacProfile; // AAC LC
         int freqIdx = 4; // 44.1KHz
-        int chanCfg = 2; // Channel Configurations
+        int chanCfg = channelCount; // Channel Configurations
 
         // fill in ADTS data
         packet[0] = (byte) 0xFF;
