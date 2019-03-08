@@ -1,7 +1,7 @@
 #!/bin/sh
 make clean
 API=19
-CPU=armeabi-v7a
+CPU=armeabi
 PLATFORM=arm-linux-androideabi
 
 # 缓存文件目录
@@ -19,7 +19,7 @@ ASM=$ISYSROOT/usr/include/$PLATFORM
 # 要保存的动态库目录 
 PREFIX=$(pwd)/android/$CPU
 
-# 生成 xxx.so 动态包
+# 生成 xxx.a 静态包
 build_libs()
 {
 	./configure \
@@ -29,8 +29,8 @@ build_libs()
 	--cross-prefix=$TOOLCHAIN/bin/arm-linux-androideabi- \
 	--disable-asm \
 	--enable-cross-compile \
-	--disable-static \
-	--enable-shared \
+	--enable-static \
+	--disable-shared \
 	--enable-runtime-cpudetect \
 	--disable-doc \
 	--disable-ffmpeg \
@@ -68,3 +68,30 @@ make -j4
 make install
 
 echo "编译结束"
+
+# 打包所有xxx.a静态包  生成一个libffmpeg.so包
+packet_one()
+{
+	$TOOLCHAIN/bin/$PLATFORM-ld \
+	-rpath-link=$SYSROOT/usr/lib \
+	-L$SYSROOT/usr/lib \
+	-L$PEFIX/lib \
+	-soname libffmpeg.so -shared -nostdlib -Bsymbolic --whole-archive --no-undefined -o \
+	$PREFIX/libffmpeg.so \
+	libavcodec/libavcodec.a \
+	libavfilter/libavfilter.a \
+	libavformat/libavformat.a \
+	libavutil/libavutil.a \
+	libswresample/libswresample.a \
+	libswscale/libswscale.a \
+	-lc -lm -lz -ldl -llog --dynamic-linker=/system/bin/linker \
+	$TOOLCHAIN/lib/gcc/$PLATFORM/4.9.x/libgcc.a
+
+	$TOOLCHAIN/bin/$PLATFORM-strip $PREFIX/libffmpeg.so
+}
+
+echo "开始打包"
+
+packet_one
+
+echo "打包结束"
