@@ -1,8 +1,8 @@
 #!/bin/sh
 make clean
 
-ANDROID_ARMV5_CFLAGS='-march=armv5te'
-ANDROID_ARMV7_CFLAGS='-march=armv7-a -mfloat-abi=softfp -mfpu=neon'
+ANDROID_ARMV5_CFLAGS='-march=armv5te -marm'
+ANDROID_ARMV7_CFLAGS='-march=armv7-a -mfloat-abi=softfp -mfpu=neon -marm'
 ANDROID_ARMV8_CFLAGS='-march=armv8-a'
 ANDROID_X86_CFLAGS='-march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32'
 ANDROID_X86_64_CFLAGS='-march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel'
@@ -30,16 +30,6 @@ ANDROID_ARCH_ABI=${ANDROID_ARCH_ABI_ARRAY[$INDEX]}
 PLATFORM=${PLATFORM_ARRAY[$INDEX]}
 PLATFORM_COROSS=${PLATFORM_COROSS_ARRAY[$INDEX]}
 
-echo "API==${API}"
-echo "TOOLCHAIN_VERSION==${TOOLCHAIN_VERSION}"
-echo "BUILD_PLATFORM==${BUILD_PLATFORM}"
-echo "ARCH==${ARCH}"
-echo "CFLAGS==${CFLAGS}"
-echo "ANDROID_ARCH_ABI==${ANDROID_ARCH_ABI}"
-echo "PLATFORM==${PLATFORM}"
-echo "PLATFORM_COROSS==${PLATFORM_COROSS}"
-
-
 # 缓存文件目录
 export TMPDIR="/Users/chenming/AndroidStudioProjects/ffmpeg-4.1/tmpdir"
 
@@ -50,11 +40,26 @@ SYSROOT=$NDK/platforms/android-$API/arch-$ARCH
 
 # NDK16 后头文件目录改动了
 ISYSROOT=$NDK/sysroot
-ASM=$ISYSROOT/usr/include/$PLATFORM
+ASM=$ISYSROOT/usr/include/$PLATFORM_COROSS
 
 # 要保存的动态库目录 
 PREFIX=$(pwd)/android/$ANDROID_ARCH_ABI
 COROSS_PREFIX=${TOOLCHAIN}/bin/$PLATFORM_COROSS-
+
+echo "-------------------------------------------------------------------------------------"
+echo "| ANDROID_ARCH_ABI : ${ANDROID_ARCH_ABI}"
+echo "-------------------------------------------------------------------------------------"
+echo "| ARCH : ${ARCH} (CPU)"
+echo "-------------------------------------------------------------------------------------"
+echo "| API : ${API}"
+echo "-------------------------------------------------------------------------------------"
+echo "| TOOLCHAIN : ${TOOLCHAIN}"
+echo "-------------------------------------------------------------------------------------"
+echo "| SYSROOT : ${SYSROOT} (android 库文件目录)"
+echo "-------------------------------------------------------------------------------------"
+echo "| SYSROOT_INCLUDE : ${ASM} (Android 库头文件目录)"
+echo "-------------------------------------------------------------------------------------"
+
 
 # 生成 xxx.so 动态包
 build_libs()
@@ -93,12 +98,16 @@ build_libs()
 	--sysroot=$SYSROOT \
 	--extra-cflags="-I$ASM -isysroot $ISYSROOT -D__ANDROID_API__=$API -U_FILE_OFFSET_BITS $CFLAGS -Os -fPIC -DANDROID -Wfatal-errors -Wno-deprecated" \
 	--extra-cxxflags="-D__thumb__ -fexceptions -frtti" \
-	--extra-ldflags="-L${SYSROOT}/usr/lib" \
+	--extra-ldflags="-L$SYSROOT/usr/lib" \
 	$ADDITIONAL_CONFIGURE_FLAG
 }
-echo "开始编译"
+echo "-------------------------------------------------------------------------------------"
+echo "| 开始编译"
+echo "-------------------------------------------------------------------------------------"
 build_libs
 make clean
 make -j4
 make install
-echo "编译结束"
+echo "-------------------------------------------------------------------------------------"
+echo "| 编译${ANDROID_ARCH_ABI}结束"
+echo "-------------------------------------------------------------------------------------"
