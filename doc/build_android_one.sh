@@ -1,32 +1,69 @@
 #!/bin/sh
 make clean
+
+ANDROID_ARMV5_CFLAGS='-march=armv5te'
+ANDROID_ARMV7_CFLAGS='-march=armv7-a -mfloat-abi=softfp -mfpu=neon'
+ANDROID_ARMV8_CFLAGS='-march=armv8-a'
+ANDROID_X86_CFLAGS='-march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32'
+ANDROID_X86_64_CFLAGS='-march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel'
+
+CFLAGS_ARRAY[0]=${ANDROID_ARMV5_CFLAGS}
+CFLAGS_ARRAY[1]=${ANDROID_ARMV7_CFLAGS} 
+CFLAGS_ARRAY[2]=${ANDROID_ARMV8_CFLAGS} 
+CFLAGS_ARRAY[3]=${ANDROID_X86_CFLAGS}
+CFLAGS_ARRAY[4]=${ANDROID_X86_64_CFLAGS}
+
+ARCH_ARRAY=(arm arm arm64 x86 x86_64)
+ANDROID_ARCH_ABI_ARRAY=(armeabi armeabi-v7a arm64-v8a x86 x86_64)
+PLATFORM_ARRAY=(arm-linux-androideabi arm-linux-androideabi aarch64-linux-android x86 x86_64)
+PLATFORM_COROSS_ARRAY=(arm-linux-androideabi arm-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android)
+
+#配置INDEX 切换打包版本
+INDEX=0
+
 API=19
-CPU=armeabi
-PLATFORM=arm-linux-androideabi
+TOOLCHAIN_VERSION=4.9
+BUILD_PLATFORM=darwin-x86_64
+ARCH=${ARCH_ARRAY[$INDEX]}
+CFLAGS=${CFLAGS_ARRAY[$INDEX]}
+ANDROID_ARCH_ABI=${ANDROID_ARCH_ABI_ARRAY[$INDEX]}
+PLATFORM=${PLATFORM_ARRAY[$INDEX]}
+PLATFORM_COROSS=${PLATFORM_COROSS_ARRAY[$INDEX]}
+
+echo "API==${API}"
+echo "TOOLCHAIN_VERSION==${TOOLCHAIN_VERSION}"
+echo "BUILD_PLATFORM==${BUILD_PLATFORM}"
+echo "ARCH==${ARCH}"
+echo "CFLAGS==${CFLAGS}"
+echo "ANDROID_ARCH_ABI==${ANDROID_ARCH_ABI}"
+echo "PLATFORM==${PLATFORM}"
+echo "PLATFORM_COROSS==${PLATFORM_COROSS}"
+
 
 # 缓存文件目录
 export TMPDIR="/Users/chenming/AndroidStudioProjects/ffmpeg-4.1/tmpdir"
 
 # NDK环境
 NDK=/Library/Android_SDK/ndk-bundle-r16
-TOOLCHAIN=$NDK/toolchains/$PLATFORM-4.9/prebuilt/darwin-x86_64
-SYSROOT=$NDK/platforms/android-$API/arch-arm/
+TOOLCHAIN=$NDK/toolchains/$PLATFORM-$TOOLCHAIN_VERSION/prebuilt/${BUILD_PLATFORM}
+SYSROOT=$NDK/platforms/android-$API/arch-$ARCH
 
 # NDK16 后头文件目录改动了
 ISYSROOT=$NDK/sysroot
 ASM=$ISYSROOT/usr/include/$PLATFORM
 
 # 要保存的动态库目录 
-PREFIX=$(pwd)/android/$CPU
+PREFIX=$(pwd)/android/$ANDROID_ARCH_ABI
+COROSS_PREFIX=${TOOLCHAIN}/bin/$PLATFORM_COROSS-
 
 # 生成 xxx.a 静态包
 build_libs()
 {
 	./configure \
 	--prefix=$PREFIX \
-	--target-os=linux \
-	--arch=$CPU \
-	--cross-prefix=$TOOLCHAIN/bin/arm-linux-androideabi- \
+	--target-os=android \
+	--arch=$ARCH \
+	--cross-prefix=$COROSS_PREFIX \
 	--disable-asm \
 	--enable-cross-compile \
 	--enable-static \
@@ -54,25 +91,22 @@ build_libs()
 	--disable-filters \
 	--disable-postproc \
 	--sysroot=$SYSROOT \
-	--extra-libs=-lgcc \
-	--extra-cflags="-I$ASM -isysroot $ISYSROOT -D__ANDROID_API__=$API -U_FILE_OFFSET_BITS -Os -fPIC -DANDROID -D__thumb__ -mthumb -Wfatal-errors -Wno-deprecated -mfloat-abi=softfp -marm" \
-	--extra-ldflags="-marm"
+	--extra-cflags="-I$ASM -isysroot $ISYSROOT -D__ANDROID_API__=$API -U_FILE_OFFSET_BITS $CFLAGS -Os -fPIC -DANDROID -Wfatal-errors -Wno-deprecated" \
+	--extra-cxxflags="-D__thumb__ -fexceptions -frtti" \
+	--extra-ldflags="-L${SYSROOT}/usr/lib" \
 	$ADDITIONAL_CONFIGURE_FLAG
 }
-
 echo "开始编译"
-
 build_libs
 make clean
 make -j4
 make install
-
 echo "编译结束"
 
 # 打包所有xxx.a静态包  生成一个libffmpeg.so包
 packet_one()
 {
-	$TOOLCHAIN/bin/$PLATFORM-ld \
+	$TOOLCHAIN/bin/$PLATFORM_COROSS-ld \
 	-rpath-link=$SYSROOT/usr/lib \
 	-L$SYSROOT/usr/lib \
 	-L$PEFIX/lib \
@@ -85,9 +119,9 @@ packet_one()
 	libswresample/libswresample.a \
 	libswscale/libswscale.a \
 	-lc -lm -lz -ldl -llog --dynamic-linker=/system/bin/linker \
-	$TOOLCHAIN/lib/gcc/$PLATFORM/4.9.x/libgcc.a
+	$TOOLCHAIN/lib/gcc/$PLATFORM_COROSS/4.9.x/libgcc.a
 
-	$TOOLCHAIN/bin/$PLATFORM-strip $PREFIX/libffmpeg.so
+	$TOOLCHAIN/bin/$PLATFORM_COROSS-strip $PREFIX/libffmpeg.so
 }
 
 echo "开始打包"
