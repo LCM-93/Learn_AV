@@ -1,5 +1,6 @@
 package com.lcm.ffmpeg;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,8 +14,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void test(View view){
+    public void test(View view) {
         FFmpegPlayer fFmpegPlayer = new FFmpegPlayer();
-        fFmpegPlayer.playMyMedia(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3");
+        fFmpegPlayer.testMyMedia(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3");
+    }
+
+
+    public void audio(View view) {
+        Intent intent = new Intent(this, AudioActivity.class);
+        startActivity(intent);
     }
 }

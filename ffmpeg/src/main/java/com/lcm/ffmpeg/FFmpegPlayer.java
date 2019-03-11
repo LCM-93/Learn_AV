@@ -1,5 +1,7 @@
 package com.lcm.ffmpeg;
 
+import android.util.Log;
+
 /**
  * ****************************************************************
  * Author: LiChenMing.Chaman
@@ -8,6 +10,7 @@ package com.lcm.ffmpeg;
  * *****************************************************************
  */
 public class FFmpegPlayer {
+
     static {
         System.loadLibrary("avcodec");
         System.loadLibrary("avdevice");
@@ -19,5 +22,13 @@ public class FFmpegPlayer {
         System.loadLibrary("cmffmpeg");
     }
 
-    public native void playMyMedia(String url);
+    public native void testMyMedia(String url);
+
+    //pcm编码为AAC
+    public native int encodePCMToAAC(String pcmPath,String outPath);
+
+    //解码音频文件
+    public native int decodeToPCM(String inPath,String outPath);
+
+
 }
