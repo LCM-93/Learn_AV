@@ -2,9 +2,12 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 add_library(
-        cmffmpeg
+        encodeAndDecode
         SHARED
-        src/main/jni/player.c)
+        src/main/jni/encodeAndDecode.c
+        src/main/jni/recordEncode.c)
+
+
 
 # 设置ffmpeg库所在目录
 set(distribution_DIR ${CMAKE_SOURCE_DIR}/src/main/jni/ffmpeg/${ANDROID_ABI})
@@ -81,7 +84,7 @@ include_directories(src/main/jni/ffmpeg/include)
 
 target_link_libraries( # Specifies the target library.
 
-        cmffmpeg
+        encodeAndDecode
 
         avcodec
         avdevice

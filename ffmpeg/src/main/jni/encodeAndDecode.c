@@ -16,7 +16,7 @@
 #define LOGE(FORMAT, ...) __android_log_print(ANDROID_LOG_ERROR,"JNIPlayer",FORMAT,##__VA_ARGS__);
 
 JNIEXPORT void JNICALL
-Java_com_lcm_ffmpeg_FFmpegPlayer_testMyMedia(JNIEnv *env, jobject instance, jstring url_) {
+Java_com_lcm_ffmpeg_audio_EncodeAndDecode_testMyMedia(JNIEnv *env, jobject instance, jstring url_) {
 
     const char *url = (*env)->GetStringUTFChars(env, url_, 0);
     LOGI("url:%s", url)
@@ -49,7 +49,7 @@ Java_com_lcm_ffmpeg_FFmpegPlayer_testMyMedia(JNIEnv *env, jobject instance, jstr
  * @return
  */
 JNIEXPORT jint JNICALL
-Java_com_lcm_ffmpeg_FFmpegPlayer_encodePCMToAAC(JNIEnv *env, jobject instance, jstring pcmPath_,
+Java_com_lcm_ffmpeg_audio_EncodeAndDecode_encodePCMToAAC(JNIEnv *env, jobject instance, jstring pcmPath_,
                                                 jstring outPath_) {
     const char *pcmPath = (*env)->GetStringUTFChars(env, pcmPath_, 0);
     const char *outPath = (*env)->GetStringUTFChars(env, outPath_, 0);
@@ -207,6 +207,7 @@ Java_com_lcm_ffmpeg_FFmpegPlayer_encodePCMToAAC(JNIEnv *env, jobject instance, j
             LOGE("avcodec_send_frame error")
         }
 
+        //获取编码后的数据
         ret = avcodec_receive_packet(pCodecCtx, &pkt);
         if (ret < 0) {
             LOGE("avcodec_receive_packet！error");
@@ -218,6 +219,7 @@ Java_com_lcm_ffmpeg_FFmpegPlayer_encodePCMToAAC(JNIEnv *env, jobject instance, j
         pkt.pts = av_rescale_q(pkt.pts, pCodecCtx->time_base, audio_st->time_base);
         pkt.dts = av_rescale_q(pkt.dts, pCodecCtx->time_base, audio_st->time_base);
         pkt.duration = av_rescale_q(pkt.duration, pCodecCtx->time_base, audio_st->time_base);
+
 
         ret = av_write_frame(pFormatCtx, &pkt);
         if (ret < 0) {
@@ -254,7 +256,7 @@ Java_com_lcm_ffmpeg_FFmpegPlayer_encodePCMToAAC(JNIEnv *env, jobject instance, j
  * @return
  */
 JNIEXPORT jint JNICALL
-Java_com_lcm_ffmpeg_FFmpegPlayer_decodeToPCM(JNIEnv *env, jobject instance, jstring inPath_,
+Java_com_lcm_ffmpeg_audio_EncodeAndDecode_decodeToPCM(JNIEnv *env, jobject instance, jstring inPath_,
                                              jstring outPath_) {
     const char *inPath = (*env)->GetStringUTFChars(env, inPath_, 0);
     const char *outPath = (*env)->GetStringUTFChars(env, outPath_, 0);
@@ -277,6 +279,7 @@ Java_com_lcm_ffmpeg_FFmpegPlayer_decodeToPCM(JNIEnv *env, jobject instance, jstr
         LOGE("获取音频信息失败")
         return -1;
     }
+
 
     //音频解码时，需要找到对应的AVStream所在的pFormatCtx->streams的索引位置
     int audio_stream_idx = -1;

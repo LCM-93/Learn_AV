@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.lcm.ffmpeg.audio.EncodeAndDecode;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -15,8 +17,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test(View view) {
-        FFmpegPlayer fFmpegPlayer = new FFmpegPlayer();
-        fFmpegPlayer.testMyMedia(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3");
+        EncodeAndDecode encodeAndDecode = new EncodeAndDecode();
+        encodeAndDecode.testMyMedia(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3");
     }
 
 

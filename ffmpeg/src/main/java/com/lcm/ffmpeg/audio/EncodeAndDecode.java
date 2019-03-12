@@ -1,15 +1,14 @@
-package com.lcm.ffmpeg;
+package com.lcm.ffmpeg.audio;
 
-import android.util.Log;
 
 /**
  * ****************************************************************
  * Author: LiChenMing.Chaman
  * Date: 2019/3/7 3:10 PM
- * Desc:
+ * Desc: 测试ffmpeg编解码
  * *****************************************************************
  */
-public class FFmpegPlayer {
+public class EncodeAndDecode {
 
     static {
         System.loadLibrary("avcodec");
@@ -19,7 +18,7 @@ public class FFmpegPlayer {
         System.loadLibrary("avutil");
         System.loadLibrary("swresample");
         System.loadLibrary("swscale");
-        System.loadLibrary("cmffmpeg");
+        System.loadLibrary("encodeAndDecode");
     }
 
     public native void testMyMedia(String url);
