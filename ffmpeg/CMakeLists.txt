@@ -2,10 +2,11 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 add_library(
-        encodeAndDecode
+        cmffmpeg
         SHARED
         src/main/jni/encodeAndDecode.c
         src/main/jni/recordEncode.c
+        src/main/jni/cmdHandle.c
         src/main/jni/ffmpeg/include/cmdutils.c
         src/main/jni/ffmpeg/include/ffmpeg_opt.c
         src/main/jni/ffmpeg/include/ffmpeg_filter.c
@@ -88,7 +89,7 @@ include_directories(src/main/jni/ffmpeg/include)
 
 target_link_libraries( # Specifies the target library.
 
-        encodeAndDecode
+        cmffmpeg
 
         avcodec
         avdevice

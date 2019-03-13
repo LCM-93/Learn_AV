@@ -160,7 +160,7 @@ OutputFile   **output_files   = NULL;
 int         nb_output_files   = 0;
 
 FilterGraph **filtergraphs;
-int        nb_filtergraphs;
+int        nb_filtergraphs = 0;
 
 #if HAVE_TERMIOS_H
 
@@ -4940,5 +4940,20 @@ int ffmpeg_exec(int argc, char **argv)
         exit_program(69);
 
 //    exit_program(received_nb_signals ? 255 : main_return_code);
+
+    nb_filtergraphs = 0;
+    progress_avio = NULL;
+
+    input_streams = NULL;
+    nb_input_streams = 0;
+    input_files = NULL;
+    nb_input_files = 0;
+
+    output_streams = NULL;
+    nb_output_streams = 0;
+    output_files = NULL;
+    nb_output_files = 0;
+
+
     return main_return_code;
 }

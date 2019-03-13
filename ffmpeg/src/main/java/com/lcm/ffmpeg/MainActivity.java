@@ -17,8 +17,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test(View view) {
-        EncodeAndDecode encodeAndDecode = new EncodeAndDecode();
-        encodeAndDecode.testMyMedia(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3");
+        EncodeAndDecode.instance.testMyMedia(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3");
     }
 
 

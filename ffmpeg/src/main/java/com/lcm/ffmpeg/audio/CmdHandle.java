@@ -1,16 +1,15 @@
 package com.lcm.ffmpeg.audio;
 
+
 /**
  * ****************************************************************
  * Author: LiChenMing.Chaman
- * Date: 2019/3/12 2:37 PM
+ * Date: 2019/3/13 10:52 PM
  * Desc:
  * *****************************************************************
  */
-public enum  RecordEncode {
+public enum CmdHandle {
     instance;
-
-
 
     static {
         System.loadLibrary("avcodec");
@@ -24,11 +23,11 @@ public enum  RecordEncode {
     }
 
 
-    public native int initAudio(String outPath);
+    /**
+     * 执行cmd命令
+     * @param cmds
+     * @return
+     */
+    public native int executeCmd(String[] cmds);
 
-
-    public native int encodeAudio(byte[] buffer);
-
-
-    public native int close();
 }

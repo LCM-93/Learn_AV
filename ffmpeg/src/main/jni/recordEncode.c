@@ -254,3 +254,4 @@ Java_com_lcm_ffmpeg_audio_RecordEncode_close(JNIEnv *env, jobject instance) {
     av_free(audio_frame_buf);
     return 0;
 }
+

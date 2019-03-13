@@ -43,4 +43,10 @@
         android:layout_height="wrap_content"
         android:onClick="stopRecord"
         android:text="结束录音" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TestCmd"
+        android:onClick="testCmd"/>
 </LinearLayout>

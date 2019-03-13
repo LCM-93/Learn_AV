@@ -8,7 +8,8 @@ package com.lcm.ffmpeg.audio;
  * Desc: 测试ffmpeg编解码
  * *****************************************************************
  */
-public class EncodeAndDecode {
+public enum  EncodeAndDecode {
+    instance;
 
     static {
         System.loadLibrary("avcodec");
@@ -18,7 +19,7 @@ public class EncodeAndDecode {
         System.loadLibrary("avutil");
         System.loadLibrary("swresample");
         System.loadLibrary("swscale");
-        System.loadLibrary("encodeAndDecode");
+        System.loadLibrary("cmffmpeg");
     }
 
     public native void testMyMedia(String url);
