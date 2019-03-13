@@ -5,8 +5,12 @@ add_library(
         encodeAndDecode
         SHARED
         src/main/jni/encodeAndDecode.c
-        src/main/jni/recordEncode.c)
-
+        src/main/jni/recordEncode.c
+        src/main/jni/ffmpeg/include/cmdutils.c
+        src/main/jni/ffmpeg/include/ffmpeg_opt.c
+        src/main/jni/ffmpeg/include/ffmpeg_filter.c
+        src/main/jni/ffmpeg/include/ffmpeg.c
+        src/main/jni/ffmpeg/include/ffmpeg_hw.c)
 
 
 # 设置ffmpeg库所在目录

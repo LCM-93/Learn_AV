@@ -11,6 +11,8 @@
 
 //打印日志
 #include <android/log.h>
+#include <libavutil/avutil.h>
+#include <libavcodec/avcodec.h>
 
 #define LOGI(FORMAT, ...) __android_log_print(ANDROID_LOG_INFO,"JNIPlayer",FORMAT,##__VA_ARGS__);
 #define LOGE(FORMAT, ...) __android_log_print(ANDROID_LOG_ERROR,"JNIPlayer",FORMAT,##__VA_ARGS__);
@@ -49,8 +51,9 @@ Java_com_lcm_ffmpeg_audio_EncodeAndDecode_testMyMedia(JNIEnv *env, jobject insta
  * @return
  */
 JNIEXPORT jint JNICALL
-Java_com_lcm_ffmpeg_audio_EncodeAndDecode_encodePCMToAAC(JNIEnv *env, jobject instance, jstring pcmPath_,
-                                                jstring outPath_) {
+Java_com_lcm_ffmpeg_audio_EncodeAndDecode_encodePCMToAAC(JNIEnv *env, jobject instance,
+                                                         jstring pcmPath_,
+                                                         jstring outPath_) {
     const char *pcmPath = (*env)->GetStringUTFChars(env, pcmPath_, 0);
     const char *outPath = (*env)->GetStringUTFChars(env, outPath_, 0);
 
@@ -256,8 +259,9 @@ Java_com_lcm_ffmpeg_audio_EncodeAndDecode_encodePCMToAAC(JNIEnv *env, jobject in
  * @return
  */
 JNIEXPORT jint JNICALL
-Java_com_lcm_ffmpeg_audio_EncodeAndDecode_decodeToPCM(JNIEnv *env, jobject instance, jstring inPath_,
-                                             jstring outPath_) {
+Java_com_lcm_ffmpeg_audio_EncodeAndDecode_decodeToPCM(JNIEnv *env, jobject instance,
+                                                      jstring inPath_,
+                                                      jstring outPath_) {
     const char *inPath = (*env)->GetStringUTFChars(env, inPath_, 0);
     const char *outPath = (*env)->GetStringUTFChars(env, outPath_, 0);
 
@@ -295,6 +299,7 @@ Java_com_lcm_ffmpeg_audio_EncodeAndDecode_decodeToPCM(JNIEnv *env, jobject insta
     AVCodecContext *pCodecCtx = pFormatCtx->streams[audio_stream_idx]->codec;
     //再根据上下文拿到编解码id，通过id拿到解码器
     AVCodec *pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
+
 
     if (pCodec == NULL) {
         LOGE("获取解码器失败！无法解码！")
@@ -341,6 +346,16 @@ Java_com_lcm_ffmpeg_audio_EncodeAndDecode_decodeToPCM(JNIEnv *env, jobject insta
     FILE *fp_pcm = fopen(outPath, "wb");
 
     int ret, got_frame, frameCount = 0;
+
+    //移动到指定帧
+    int seek_pot = 60 * AV_TIME_BASE;
+    if(pFormatCtx->start_time != AV_NOPTS_VALUE){
+        seek_pot += pFormatCtx->start_time;
+    }
+    if (av_seek_frame(pFormatCtx, -1, seek_pot, AVSEEK_FLAG_BACKWARD) < 0) {
+        LOGE("av_seek_frame error")
+    };
+
 
     //一帧帧的读取压缩的音频数据
     while (av_read_frame(pFormatCtx, packet) >= 0) {
