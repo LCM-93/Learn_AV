@@ -50,6 +50,7 @@ public class AudioDecode {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 decodeAudio();
             }
         });
@@ -61,11 +62,7 @@ public class AudioDecode {
 
     public void stopDecode(){
         thread.interrupt();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
     }
 
 

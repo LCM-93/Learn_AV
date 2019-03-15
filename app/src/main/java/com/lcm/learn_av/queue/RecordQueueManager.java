@@ -19,6 +19,13 @@ public class RecordQueueManager {
 
     private static RecordQueueManager instance;
 
+    private boolean enable;
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+        queue.clear();
+    }
+
     public static RecordQueueManager getInstance() {
         if (instance == null) {
             synchronized (RecordQueueManager.class) {
@@ -33,10 +40,13 @@ public class RecordQueueManager {
     private RecordQueueManager() {
         buf = ByteBuffer.allocate(AudioData.DATA_SIZE * 5);
         buf.mark();
-        queue = new LinkedBlockingQueue<>(20);
+        queue = new LinkedBlockingQueue<>(2);
+        enable = true;
     }
 
     public void put(byte[] data, int offset, int size) {
+        if (!enable) return;
+        Log.i(TAG,"put record "+size);
         buf.put(data, offset, size);
         int position = buf.position();
 
@@ -47,7 +57,7 @@ public class RecordQueueManager {
 
             try {
                 queue.put(new RecordData(frameBuf));
-                Log.e(TAG, "<<<<<<<< 录音数据");
+                Log.e(TAG, "<<<<<<<< 录音数据 "+queue.size());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -59,13 +69,16 @@ public class RecordQueueManager {
     }
 
     public RecordData getRecordData() {
-            try {
-                Log.e(TAG, ">>>>>>> 录音数据");
-                return queue.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return null;
-            }
+        if (!enable) {
+            return null;
+        }
+        try {
+
+            return queue.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
 
     }
 

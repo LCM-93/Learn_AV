@@ -373,6 +373,8 @@ Java_com_lcm_ffmpeg_audio_EncodeAndDecode_decodeToPCM(JNIEnv *env, jobject insta
                 int out_buffer_size = av_samples_get_buffer_size(NULL, outChannelNb,
                                                                  frame->nb_samples, outSampleFmt,
                                                                  1);
+
+                LOGE("size: %d",out_buffer_size);
                 //写入文件
                 fwrite(out_buffer, 1, out_buffer_size, fp_pcm);
             }

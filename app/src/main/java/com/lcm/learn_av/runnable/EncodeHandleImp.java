@@ -1,17 +1,11 @@
-package com.lcm.learn_av.record;
+package com.lcm.learn_av.runnable;
 
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.util.Log;
 
-import com.lcm.learn_av.queue.AudioData;
-import com.lcm.learn_av.queue.DecodeQueueManager;
-import com.lcm.learn_av.queue.RecordData;
-import com.lcm.learn_av.queue.RecordQueueManager;
+import com.lcm.learn_av.runnable.imp.EncodeHandle;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,30 +14,12 @@ import java.nio.ByteBuffer;
 /**
  * ****************************************************************
  * Author: LiChenMing.Chaman
- * Date: 2019/3/14 5:45 PM
+ * Date: 2019/3/15 2:23 PM
  * Desc:
  * *****************************************************************
  */
-public class AudioEncode {
-    private static AudioEncode instance;
-    private Thread thread;
-
-    private AudioEncode() {
-    }
-
-    public static AudioEncode getInstance() {
-        if (instance == null) {
-            synchronized (AudioEncode.class) {
-                if (instance == null) {
-                    instance = new AudioEncode();
-                }
-            }
-        }
-        return instance;
-    }
-
-
-    private static final String TAG = "AudioEncode";
+public class EncodeHandleImp implements EncodeHandle {
+    private static final String TAG = "EncodeHandleImp";
 
     private String mOutPath;
     private MediaFormat mMediaFormat;
@@ -59,34 +35,45 @@ public class AudioEncode {
     private int sampleRate = 44100; //采样率
     private int channelCount = 2; //声道数
     private int bitRate = 128000; //比特率
-    private int inputBufferSize = 100 * 1024; //inputBuffer的大小
+    private int inputBufferSize = 10 * 1024; //inputBuffer的大小
     private int aacProfile = MediaCodecInfo.CodecProfileLevel.AACObjectLC;
     private FileOutputStream fos;
 
-    private boolean startEncode;
-
-    private AudioTrack mAudioTrack;
+    private boolean isEncodeEnable;
 
 
-    public void init(String outPath) {
+    public EncodeHandleImp(String outPath) {
+        initEncode(outPath);
+    }
+
+
+    @Override
+    public void initEncode(String outPath) {
         this.mOutPath = outPath;
         if (!initMediaFormat()) {
+            Log.e(TAG, "initMediaFormat error");
             return;
         }
-        initAudioTrack();
         mEncoder.start();
+        isEncodeEnable = true;
         mEncodeInputBuffers = mEncoder.getInputBuffers(); // 获取输入的缓冲区
         mEncodeOutputBuffers = mEncoder.getOutputBuffers(); //获取输出的缓冲区
         mEncodeBufferInfo = new MediaCodec.BufferInfo(); //用于描述编码得到的byte信息
+    }
 
 
-        thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                encode();
-            }
-        });
+    @Override
+    public boolean isEncodeEnable() {
+        return isEncodeEnable && mEncoder != null;
+    }
+    @Override
+    public void disableEncode() {
+        isEncodeEnable = false;
+    }
+
+    @Override
+    public void enableEncode() {
+        isEncodeEnable = true;
     }
 
 
@@ -109,77 +96,11 @@ public class AudioEncode {
         }
     }
 
-
-    public void start() {
-        mAudioTrack.play();
-        startEncode = true;
-        thread.start();
-    }
-
-    public void stop() {
-        startEncode = false;
-        thread.interrupt();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    @Override
+    public void encode(byte[] data) {
+        if (!isEncodeEnable) {
+            return;
         }
-
-        if(mAudioTrack != null){
-            mAudioTrack.stop();
-            mAudioTrack.release();
-        }
-    }
-
-
-    private void encode() {
-        while (startEncode) {
-            RecordData recordData = RecordQueueManager.getInstance().getRecordData();
-            AudioData audioData = DecodeQueueManager.getInstance().getAudioData();
-            if(audioData!=null){
-                mAudioTrack.write(audioData.getData(),0,audioData.getData().length);
-            }
-
-            if(recordData != null && audioData != null) {
-                Log.e(TAG, "recordData:" + recordData.getData().length + "  audioData:" + audioData.getData().length);
-                byte[] bytes = mixAudio(recordData.getData(),audioData.getData(),  0.3f);
-                encodeData(bytes);
-            }
-        }
-    }
-
-    /**
-     * 初始化AudioTrack
-     */
-    private void initAudioTrack(){
-        //计算需要最小缓冲区大小
-        int bufSize = AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT);
-        //创建AudioTrack
-        //AudioFormat.CHANNEL_OUT_STEREO 双声道  AudioFormat.CHANNEL_OUT_MONO 单声道
-        //AudioFormat.ENCODING_PCM_16BIT  AudioFormat.ENCODING_PCM_8BIT  采样精度
-        //AudioTrack.MODE_STREAM 通过write()方法将数据一次次写入到AudioTrack中进行播放    AudioTrack.MODE_STATIC 把音频放入一个固定的buffer 一次性传给AudioTrack
-        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,44100,AudioFormat.CHANNEL_OUT_STEREO,AudioFormat.ENCODING_PCM_16BIT,bufSize,AudioTrack.MODE_STREAM);
-    }
-
-
-    private byte[] mixAudio(byte[] audioData, byte[] bytes, float volume) {
-        short[] cret = new short[audioData.length / 2];
-        for (int i = 0; i < audioData.length / 2; i++) {
-            short c = (short) ((audioData[i * 2] & 0xFF) | ((audioData[i * 2 + 1] & 0xFF) << 8));
-            short c1 = (short) ((bytes[i * 2] & 0xFF) | ((bytes[i * 2 + 1] & 0xFF) << 8));
-            cret[i] = (short) ((c + c1 * 0.5 * volume) / 2);
-        }
-
-        byte[] ret = new byte[audioData.length];
-        for (int i = 0; i < cret.length; i++) {
-            ret[i * 2] = (byte) ((cret[i] & 0x00FF));
-            ret[i * 2 + 1] = (byte) ((cret[i] & 0xFF00) >> 8);
-        }
-        return ret;
-    }
-
-
-    private void encodeData(byte[] data) {
         ByteBuffer inputBuffer;
         ByteBuffer outputBuffer;
         int outPacketSize;
@@ -233,5 +154,27 @@ public class AudioEncode {
         packet[5] = (byte) (((packetLen & 7) << 5) + 0x1F);
         packet[6] = (byte) 0xFC;
     }
+
+
+    @Override
+    public void release() {
+        try {
+            if (fos != null) {
+                fos.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (mEncoder != null) {
+            mEncoder.stop();
+            mEncoder.release();
+        }
+        mEncodeBufferInfo = null;
+        mEncodeInputBuffers = null;
+        mEncodeOutputBuffers = null;
+        mMediaFormat = null;
+    }
+
 
 }

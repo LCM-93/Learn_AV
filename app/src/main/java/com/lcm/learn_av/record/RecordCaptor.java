@@ -35,13 +35,16 @@ public class RecordCaptor {
 
 
     public void startRecord() {
-        if (isRecording || !createAudioRecord() || mAudioRecord == null) return;
+        if (isRecording || mAudioRecord == null) return;
         mAudioRecord.startRecording();
         isRecording = true;
-        mRecordThread = new Thread(mRecordRunnable);
         mRecordThread.start();
     }
 
+    public void init() {
+        createAudioRecord();
+        mRecordThread = new Thread(mRecordRunnable);
+    }
 
     /**
      * 创建AudioRecord
@@ -64,15 +67,7 @@ public class RecordCaptor {
 
     public void stopRecord() {
         isRecording = false;
-        try {
-            if (mRecordThread != null) {
-                mRecordThread.interrupt();
-                mRecordThread.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        mRecordThread.interrupt();
         mAudioRecord.stop();
         mAudioRecord.release();
         mAudioRecord = null;
@@ -82,6 +77,7 @@ public class RecordCaptor {
     private class RecordRunnable implements Runnable {
         @Override
         public void run() {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             while (isRecording && mAudioRecord != null) {
                 byte[] data = new byte[minBufferSize];
                 int read = mAudioRecord.read(data, 0, minBufferSize);

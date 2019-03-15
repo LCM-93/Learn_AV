@@ -37,8 +37,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void init(View view) {
+        mRecordCaptor.init();
         AudioDecode.getInstance().init(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3");
         AudioEncode.getInstance().init(Environment.getExternalStorageDirectory() + "/recorders/out.aac");
+
     }
 
 
@@ -46,12 +48,6 @@ public class MainActivity extends AppCompatActivity {
         mRecordCaptor.startRecord();
         AudioDecode.getInstance().startDecode();
         AudioEncode.getInstance().start();
-        MediaManage.playSound(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3", new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-
-            }
-        });
     }
 
 
@@ -61,5 +57,14 @@ public class MainActivity extends AppCompatActivity {
         AudioEncode.getInstance().stop();
     }
 
+
+    public void audition(View view){
+        MediaManage.playSound(Environment.getExternalStorageDirectory() + "/recorders/out.aac", new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                MediaManage.stop();
+            }
+        });
+    }
 
 }
