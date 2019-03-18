@@ -4,15 +4,17 @@ import android.content.Context;
 
 import com.lcm.learn_av.queue.DecodeQueueManager;
 import com.lcm.learn_av.queue.RecordQueueManager;
-import com.lcm.learn_av.runnable.DecodeHandleImp;
-import com.lcm.learn_av.runnable.DecodeRunnable;
-import com.lcm.learn_av.runnable.EncodeHandleImp;
-import com.lcm.learn_av.runnable.EncodeRunnable;
-import com.lcm.learn_av.runnable.RecordHandleImp;
-import com.lcm.learn_av.runnable.RecordRunnable;
-import com.lcm.learn_av.runnable.imp.DecodeHandle;
-import com.lcm.learn_av.runnable.imp.EncodeHandle;
-import com.lcm.learn_av.runnable.imp.RecordHandle;
+import com.lcm.learn_av.record.handle.DecodeHandleImp;
+import com.lcm.learn_av.record.handle.DecodeRunnable;
+import com.lcm.learn_av.record.handle.EncodeHandleImp;
+import com.lcm.learn_av.record.handle.EncodeRunnable;
+import com.lcm.learn_av.record.handle.FFmpegDecodeHandleImp;
+import com.lcm.learn_av.record.handle.FFmpegEncodeHandleImp;
+import com.lcm.learn_av.record.handle.RecordHandleImp;
+import com.lcm.learn_av.record.handle.RecordRunnable;
+import com.lcm.learn_av.record.handle.imp.DecodeHandle;
+import com.lcm.learn_av.record.handle.imp.EncodeHandle;
+import com.lcm.learn_av.record.handle.imp.RecordHandle;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,30 +39,21 @@ public class RecordManager {
 
     private ExecutorService mExecutorService;
 
-    
 
-
-    public void init(String bgPath, String outPath) {
-        mDecodeHandle = new DecodeHandleImp(bgPath);
-        mEncodeHandle = new EncodeHandleImp(outPath);
+    public void init(Context context, boolean isRemoveEcho, String bgPath, String outPath) {
         mRecordHandle = new RecordHandleImp();
+        mRecordHandle.initRecord(context, isRemoveEcho);
+
+        mDecodeHandle = new FFmpegDecodeHandleImp(-1, bgPath);
+        mEncodeHandle = new EncodeHandleImp(outPath);
+
         mDecodeRunnable = new DecodeRunnable(mDecodeHandle);
         mEncodeRunnable = new EncodeRunnable(mEncodeHandle);
         mRecordRunnable = new RecordRunnable(mRecordHandle);
     }
 
-    /**
-     * 设置回声消除
-     *
-     * @param bool
-     */
-    public void setAcousticEcho(Context context, boolean bool) {
-        mRecordHandle.setAcousticEcho(context, bool);
-    }
-
 
     public void startRecord() {
-
         mEncodeHandle.enableEncode();
         mDecodeHandle.enableDecode();
         mRecordHandle.startRecord();
@@ -77,6 +70,7 @@ public class RecordManager {
         mEncodeHandle.disableEncode();
         mDecodeHandle.disableDecode();
         mRecordHandle.stopRecord();
+
     }
 
 

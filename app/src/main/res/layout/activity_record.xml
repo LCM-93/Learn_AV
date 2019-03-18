@@ -31,4 +31,9 @@
         android:text="试听"
         android:onClick="audition"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="试听1"
+        android:onClick="audition1"/>
 </LinearLayout>

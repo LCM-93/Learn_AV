@@ -18,23 +18,31 @@ public class RecordActivity extends AppCompatActivity {
         setContentView(R.layout.activity_record);
     }
 
-    public void init(View view){
+    public void init(View view) {
         mRecordManager = new RecordManager();
-        mRecordManager.init(Environment.getExternalStorageDirectory() + "/recorders/bj.mp3",Environment.getExternalStorageDirectory() + "/recorders/record_out.aac");
-        mRecordManager.setAcousticEcho(this,true);
+        mRecordManager.init(this, false, Environment.getExternalStorageDirectory() + "/recorders/bj.mp3", Environment.getExternalStorageDirectory() + "/recorders/record_out.aac");
     }
 
-    public void start(View view){
+    public void start(View view) {
         mRecordManager.startRecord();
     }
 
-    public void stop(View view){
+    public void stop(View view) {
         mRecordManager.stopRecord();
     }
 
 
-    public void audition(View view){
+    public void audition(View view) {
         MediaManage.playSound(Environment.getExternalStorageDirectory() + "/recorders/record_out.aac", new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                MediaManage.stop();
+            }
+        });
+    }
+
+    public void audition1(View view) {
+        MediaManage.playSound(Environment.getExternalStorageDirectory() + "/recorders/record_out_1.aac", new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 MediaManage.stop();

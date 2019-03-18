@@ -41,7 +41,7 @@ public class DecodeQueueManager {
     private DecodeQueueManager() {
         buf = ByteBuffer.allocate(AudioData.DATA_SIZE * 5);
         buf.mark();
-        queue = new LinkedBlockingQueue<>(1);
+        queue = new LinkedBlockingQueue<>(2);
         enable = true;
     }
 
