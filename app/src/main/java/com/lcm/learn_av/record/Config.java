@@ -19,12 +19,12 @@ public class Config {
     public static int BITE_RATE = 128000;
 
     //声道数
-    public static int CHANNEL_COUNT =1;
+    public static int CHANNEL_COUNT = 2;
 
     //双声道
-    public static int AUDIOFORMAT_IN_CHANNEL = AudioFormat.CHANNEL_IN_MONO;
+    public static int AUDIOFORMAT_IN_CHANNEL = AudioFormat.CHANNEL_IN_STEREO;
 
-    public static int AUDIOFORMAT_OUT_CHANNEL = AudioFormat.CHANNEL_OUT_MONO;
+    public static int AUDIOFORMAT_OUT_CHANNEL = AudioFormat.CHANNEL_OUT_STEREO;
 
     //
     public static int AUDIOFORAM_BIT = AudioFormat.ENCODING_PCM_16BIT;
@@ -32,5 +32,5 @@ public class Config {
 
     public static int RECORD_SOURCE = MediaRecorder.AudioSource.MIC;
 
-    public static int RECORD_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+    public static int RECORD_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;
 }

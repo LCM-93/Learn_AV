@@ -20,7 +20,7 @@ public class RecordActivity extends AppCompatActivity {
 
     public void init(View view) {
         mRecordManager = new RecordManager();
-        mRecordManager.init(this, false, Environment.getExternalStorageDirectory() + "/recorders/bj.mp3", Environment.getExternalStorageDirectory() + "/recorders/record_out.aac");
+        mRecordManager.init(this, true, Environment.getExternalStorageDirectory() + "/recorders/bj.mp3", Environment.getExternalStorageDirectory() + "/recorders/record_out.aac");
     }
 
     public void start(View view) {

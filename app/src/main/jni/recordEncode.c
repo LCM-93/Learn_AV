@@ -55,7 +55,7 @@ Java_com_lcm_learn_1av_record_handle_FFmpegEncodeHandleImp_initFFmpegEncode(JNIE
     enum AVSampleFormat inSampleFmt = AV_SAMPLE_FMT_S16;
     enum AVSampleFormat outSampleFmt = AV_SAMPLE_FMT_FLTP;
     const int sampleRate = 44100;
-    const int channels = 1;
+    const int channels = 2;
     const int sampleByte = 2;
     const int bitRate = 128000;
 
@@ -92,7 +92,7 @@ Java_com_lcm_learn_1av_record_handle_FFmpegEncodeHandleImp_initFFmpegEncode(JNIE
     pCodecEncodeCtxEncode->codec_type = AVMEDIA_TYPE_AUDIO;
     pCodecEncodeCtxEncode->sample_fmt = outSampleFmt;
     pCodecEncodeCtxEncode->sample_rate = sampleRate;
-    pCodecEncodeCtxEncode->channel_layout = AV_CH_LAYOUT_MONO;
+    pCodecEncodeCtxEncode->channel_layout = AV_CH_LAYOUT_STEREO;
     pCodecEncodeCtxEncode->channels = av_get_channel_layout_nb_channels(pCodecEncodeCtxEncode->channel_layout);
     pCodecEncodeCtxEncode->bit_rate = bitRate;
 
@@ -193,6 +193,7 @@ Java_com_lcm_learn_1av_record_handle_FFmpegEncodeHandleImp_fFmpegEncode(JNIEnv *
         LOGE("swr_convert error")
         return -1;
     }
+
 
     //编码
     ret = avcodec_send_frame(pCodecEncodeCtxEncode, audio_frame);

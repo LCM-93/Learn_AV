@@ -48,19 +48,19 @@ public class FFmpegEncodeHandleImp implements EncodeHandle {
 
     @Override
     public void encode(byte[] data) {
-        int length = data.length;
-        while (length > minSize){
-            byte[] temp = new byte[minSize];
-            System.arraycopy(data,0,temp,0,minSize);
-            Log.w(TAG, "编码 ====>" + temp.length);
-            fFmpegEncode(temp);
-
-            byte[] temp2 = new byte[length - minSize];
-            System.arraycopy(data,minSize-1,temp2,0,length-minSize);
-            data = temp2;
-            length = data.length;
-        }
-        Log.w(TAG, "编码 ====>" + data.length);
+//        int length = data.length;
+//        while (length > minSize){
+//            byte[] temp = new byte[minSize];
+//            System.arraycopy(data,0,temp,0,minSize);
+//            Log.w(TAG, "编码 ====>" + temp.length);
+//            fFmpegEncode(temp);
+//
+//            byte[] temp2 = new byte[length - minSize];
+//            System.arraycopy(data,minSize-1,temp2,0,length-minSize);
+//            data = temp2;
+//            length = data.length;
+//        }
+//        Log.w(TAG, "编码 ====>" + data.length);
         fFmpegEncode(data);
     }
 

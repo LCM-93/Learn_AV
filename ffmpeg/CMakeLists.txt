@@ -1,17 +1,15 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+file(GLOB_RECURSE FFMPEG_CMD_SRC "src/main/jni/ffmpeg/include/*.c")
+
 add_library(
         cmffmpeg
         SHARED
         src/main/jni/encodeAndDecode.c
         src/main/jni/recordEncode.c
         src/main/jni/cmdHandle.c
-        src/main/jni/ffmpeg/include/cmdutils.c
-        src/main/jni/ffmpeg/include/ffmpeg_opt.c
-        src/main/jni/ffmpeg/include/ffmpeg_filter.c
-        src/main/jni/ffmpeg/include/ffmpeg.c
-        src/main/jni/ffmpeg/include/ffmpeg_hw.c)
+        ${FFMPEG_CMD_SRC})
 
 
 # 设置ffmpeg库所在目录

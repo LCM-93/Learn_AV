@@ -4,3 +4,5 @@
 
 [编译ffmpeg](https://github.com/lichenming0516/Learn_AV/blob/master/doc/编译FFmpeg.md)
 
+[CMake编译Speex](https://github.com/lichenming0516/Learn_AV/blob/master/doc/CMake编译Speex.md)
+

@@ -58,9 +58,9 @@ public class EchoControlUtil {
 
 
     public byte[] handleData(byte[] data) {
-//        if (!isAECEnable && isRemoveEcho) {
-//            return byteMerger(data);
-//        }
+        if (!isAECEnable && isRemoveEcho) {
+            return byteMerger(data);
+        }
         return data;
     }
 
@@ -124,7 +124,7 @@ public class EchoControlUtil {
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setSpeakerphoneOn(true);
         } else {
-            Config.RECORD_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;//立体声
+            Config.RECORD_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;//立体声
             Config.RECORD_SOURCE = MediaRecorder.AudioSource.MIC;//音频源
         }
     }

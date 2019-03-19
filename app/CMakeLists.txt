@@ -1,6 +1,15 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+# 添加宏定义
+add_definitions(-D FIXED_POINT)
+add_definitions(-D USE_KISS_FFT)
+add_definitions(-U HAVE_CONFIG_H)
+
+file(GLOB_RECURSE FFMPEG_CMD_SRC "src/main/jni/ffmpeg/include/*.c")
+#file(GLOB_RECURSE ALL_SPEEX_SRC "src/main/jni/speex/libspeex/*.c")
+file(GLOB_RECURSE ALL_SPEEXDSP_SRC "src/main/jni/speex/libspeexdsp/*.c")
+
 add_library(
         cmffmpeg
         SHARED
@@ -8,11 +17,10 @@ add_library(
         src/main/jni/recordEncode.c
         src/main/jni/recordDecode.c
         src/main/jni/cmdHandle.c
-        src/main/jni/ffmpeg/include/cmdutils.c
-        src/main/jni/ffmpeg/include/ffmpeg_opt.c
-        src/main/jni/ffmpeg/include/ffmpeg_filter.c
-        src/main/jni/ffmpeg/include/ffmpeg.c
-        src/main/jni/ffmpeg/include/ffmpeg_hw.c)
+        src/main/jni/speex_jni.cpp
+        src/main/jni/speex_dsp_jni.c
+        ${FFMPEG_CMD_SRC}
+        ${ALL_SPEEXDSP_SRC})
 
 
 # 设置ffmpeg库所在目录
@@ -86,7 +94,8 @@ find_library( # Sets the name of the path variable.
         log)
 
 # 添加ffmpeg头文件路径
-include_directories(src/main/jni/ffmpeg/include)
+include_directories(src/main/jni/ffmpeg/include
+                src/main/jni/speex/include )
 
 target_link_libraries( # Specifies the target library.
 

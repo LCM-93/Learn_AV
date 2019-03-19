@@ -44,8 +44,8 @@ public class RecordManager {
         mRecordHandle = new RecordHandleImp();
         mRecordHandle.initRecord(context, isRemoveEcho);
 
-        mDecodeHandle = new FFmpegDecodeHandleImp(-1, bgPath);
-        mEncodeHandle = new EncodeHandleImp(outPath);
+        mDecodeHandle = new FFmpegDecodeHandleImp(mRecordHandle.getAudioSessionId(), bgPath);
+        mEncodeHandle = new FFmpegEncodeHandleImp(outPath);
 
         mDecodeRunnable = new DecodeRunnable(mDecodeHandle);
         mEncodeRunnable = new EncodeRunnable(mEncodeHandle);

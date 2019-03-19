@@ -100,7 +100,7 @@ Java_com_lcm_learn_1av_record_handle_FFmpegDecodeHandleImp_initFFmpegDecode(JNIE
     //输入的声道布局
     uint64_t inChannelLayout = pCodecCtx->channel_layout;
     //输出的声道布局
-    uint64_t outChanelLayout = AV_CH_LAYOUT_MONO;
+    uint64_t outChanelLayout = AV_CH_LAYOUT_STEREO;
 
     swr_alloc_set_opts(swrCtx, outChanelLayout, outSampleFmt, outSampleRate,
                        inChannelLayout, inSampleFmt, inSampleRate, 0, NULL);

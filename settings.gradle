@@ -1,1 +1,1 @@
-include ':app', ':mediacodec', ':ffmpeg'
+include 'APP:', ':mediacodec', ':ffmpeg', ':speex'
